@@ -2,16 +2,19 @@
 <package >
   <metadata>
     <id>m3.Tokens</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <version>1.0.0.0</version>
+    <title>m3.Tokens</title>
+    <authors>Mateusz Stasch (matt.stasch@gmail.com)</authors>
+    <owners>Mateusz Stasch (matt.stasch@gmail.com)</owners>
     <licenseUrl>http://github.com/mat3u/m3.Tokens/blob/master/LICENSE</licenseUrl>
     <projectUrl>http://github.com/mat3u/m3.Tokens</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>User friendly (relatively), fast unique token generation library.</description>
     <releaseNotes>First release</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>Token Code Unique GUID</tags>
   </metadata>
+  <files>
+    <file src="m3.Tokens\bin\Release\m3.Tokens.dll" target="lib"/>
+  </files>
 </package>
