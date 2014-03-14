@@ -7,11 +7,11 @@
     {
         static void Main(string[] args)
         {
-            var tokens = Enumerable.Range(0, 25).Select(x => Token.NewToken());
+            var tokens = Enumerable.Range(0, 25).Select(x => TokenFactory.NewToken());
 
             foreach (var token in tokens)
             {
-                Console.WriteLine(token);
+                Console.WriteLine(token.Equals((object)token));
             }
 
             Console.ReadKey();

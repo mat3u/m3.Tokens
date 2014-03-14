@@ -3,6 +3,7 @@
     using System;
     using System.Runtime.Serialization;
     using System.Text.RegularExpressions;
+    using System.Threading;
 
     /// <summary>
     /// User friendly (relatively) token for anonymous access scenarios.
@@ -36,12 +37,21 @@
                 };
             }
         }
-        
+        private static readonly Random Random;
+
+        static Token()
+        {
+            Random = new Random();
+        }
+
         private readonly Int32 _a;
         private readonly Int32 _b;
         private readonly Int32 _c;
 
-        public Token() { }
+        public Token()
+        {
+            
+        }
 
         public Token(Int32 a, Int32 b, Int32 c)
         {
@@ -56,18 +66,13 @@
 
         protected Token(SerializationInfo info, StreamingContext context)
         {
-            if (info == null) { throw new ArgumentException("info"); }
-
-            var code = info.GetString("code");
-
-            Parse(code, out _a, out _b, out _c);
         }
 
         public Int32 A { get { return _a; } }
         public Int32 B { get { return _b; } }
         public Int32 C { get { return _c; } }
 
-        private static void Parse(string code, out Int32 a, out Int32 b, out Int32 c)
+        public static Token Parse(string code)
         {
             code = code.Replace('o', '0')
                        .Replace('O', '0')
@@ -84,19 +89,11 @@
 
             var firstSection = code.Length == 16 ? 6 : 5;
 
-
-            a = BaseConverter.BaseNToInt32(code.Substring(0, firstSection), Alphabet);
-            b = BaseConverter.BaseNToInt32(code.Substring(firstSection, 5), Alphabet);
-            c = BaseConverter.BaseNToInt32(code.Substring(firstSection + 5), Alphabet);
-        }
-
-        public static Token Parse(string code)
-        {
-            Int32 a, b, c;
-
-            Parse(code, out a, out b, out c);
-
-            return new Token(a, b, c);
+            return new Token(
+                BaseConverter.BaseNToInt32(code.Substring(0, firstSection), Alphabet),
+                BaseConverter.BaseNToInt32(code.Substring(firstSection, 5), Alphabet),
+                BaseConverter.BaseNToInt32(code.Substring(firstSection + 5), Alphabet)
+                );
         }
 
         public static bool TryParse(string code, out Token token)
@@ -113,15 +110,28 @@
             }
         }
 
-        public bool Equals(Token other)
+        public static Token NewToken(DateTime? epochStart = null)
         {
-            return _a == other._a && _b == other._b && _c == other._c;
+            if (!epochStart.HasValue)
+            {
+                epochStart = DefaultEpochStart;
+            }
+
+            lock (Random)
+            {
+                var time = (DateTime.Now - epochStart.Value);
+
+                return new Token(
+                    Convert.ToInt32(time.TotalSeconds % (Int32.MaxValue - 2000)) + (Int32)(time.Ticks % 2000),
+                    Random.Next(MaxSectionValue) ^ Thread.CurrentThread.ManagedThreadId,
+                    Random.Next(MaxSectionValue)
+                    );
+            }
         }
 
-        public override bool Equals(object obj)
+        public bool Equals(Token other)
         {
-            var other = obj as Token;
-            return other != null && Equals(other);
+            return object.Equals(this, other);
         }
 
         public override int GetHashCode()
@@ -129,7 +139,7 @@
             return _a ^ _b ^ _c;
         }
 
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        public void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("code", this.ToString());
         }
