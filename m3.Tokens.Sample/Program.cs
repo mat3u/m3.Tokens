@@ -11,7 +11,7 @@
 
             foreach (var token in tokens)
             {
-                Console.WriteLine(token.Equals((object)token));
+                Console.WriteLine(token);
             }
 
             Console.ReadKey();
